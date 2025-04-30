@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&display=swap" rel="stylesheet">
+  <title>Find and Replace</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Georgia, serif;
+      margin: 20px;
+      padding: 20px;
+      background-color: #2a2a2a;
+      color: #B5AEE8;
+    }
+
+    #container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .find-replace-pair {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .find-replace-pair label {
+      margin-right: 10px;
+    }
+
+    .find-replace-pair input {
+      margin-right: 10px;
+    }
+
+    .remove-button {
+      margin-left: 10px;
+      color: red;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+
+    #inputAreaContainer {
+      margin-bottom: 20px;
+    }
+
+    .toggles {
+      margin-bottom: 20px;
+    }
+
+    .toggles label {
+      margin-right: 15px;
+    }
+
+    textarea {
+      width: 100%;
+    }
+
+    #resultText {
+      background-color: #E6DCE9;
+    }
+	
+	#scrollBtn {
+	  position: fixed;
+	  bottom: 20px;
+	  right: 20px;
+	  z-index: 99;
+	  border: none;
+	  outline: none;
+	  background-color: #C389EB;
+	  color: black;
+	  cursor: pointer;
+	  width: 48px;
+	  height: 48px;
+	  font-size: 24px;
+	  font-weight: bold;
+	  line-height: 1;
+	  border-radius: 50%;
+	  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  padding: 0;
+	}
+
+    @media (max-width: 768px) {
+      .find-replace-pair {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+      }
+
+      .find-replace-pair label,
+      .find-replace-pair input,
+      .remove-button {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      button {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      #copyButton {
+        width: 100%;
+      }
+
+      .toggles {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .toggles label {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Find and Replace Text</h1>
+
+    <!-- Input Text Area + Clear Button -->
+    <div id="inputAreaContainer">
+      <textarea id="inputText" rows="10" placeholder="Enter your text here..."></textarea><br>
+      <button onclick="clearInputText()">Clear Input</button>
+    </div>
+
+    <!-- Find/Replace Inputs + Buttons -->
+    <h2>Find and Replace List</h2>
+    <div id="findReplaceContainer">
+      <div class="find-replace-pair">
+        <label>Find: </label>
+        <input type="text" class="find" placeholder="Find">
+        <label>Replace with: </label>
+        <input type="text" class="replace" placeholder="Replace">
+        <span class="remove-button" onclick="removePair(this)">✖</span>
+      </div>
+    </div>
+    <button onclick="addFindReplacePair()">Add</button>
+    <button onclick="clearFindReplaceInputs()">Clear</button><br><br>
+
+    <!-- Toggle Options -->
+    <div class="toggles">
+      <label><input type="checkbox" id="matchCase"> Match Case</label>
+      <label><input type="checkbox" id="wholeWords"> Whole Words</label>
+    </div>
+
+    <!-- Replace Button -->
+    <button onclick="replaceText()">Replace</button><br><br>
+
+    <!-- Output Area + Copy Button -->
+    <h2>Result:</h2>
+    <textarea id="resultText" rows="10" readonly></textarea><br><br>
+    <button id="copyButton" onclick="copyResultText()">Copy Result</button>
+
+    <div id="replacementCounts" style="margin-top: 20px;"></div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function addFindReplacePair() {
+      const container = document.getElementById('findReplaceContainer');
+      const newPair = document.createElement('div');
+      newPair.classList.add('find-replace-pair');
+      newPair.innerHTML = `
+        <label>Find: </label>
+        <input type="text" class="find" placeholder="Find">
+        <label>Replace with: </label>
+        <input type="text" class="replace" placeholder="Replace">
+        <span class="remove-button" onclick="removePair(this)">✖</span>
+      `;
+      container.appendChild(newPair);
+    }
+
+    function removePair(button) {
+      const container = document.getElementById('findReplaceContainer');
+      const pairs = container.getElementsByClassName('find-replace-pair');
+      if (pairs.length > 1) {
+        button.parentElement.remove();
+      } else {
+        alert("At least one Find/Replace pair must remain.");
+      }
+    }
+
+    function clearInputText() {
+      document.getElementById("inputText").value = '';
+    }
+
+    function clearFindReplaceInputs() {
+      const findInputs = document.querySelectorAll('.find');
+      const replaceInputs = document.querySelectorAll('.replace');
+      findInputs.forEach(input => input.value = '');
+      replaceInputs.forEach(input => input.value = '');
+    }
+
+    function replaceText() {
+      let text = document.getElementById("inputText").value;
+      const finds = document.querySelectorAll('.find');
+      const replaces = document.querySelectorAll('.replace');
+      const matchCase = document.getElementById("matchCase").checked;
+      const wholeWords = document.getElementById("wholeWords").checked;
+      let flags = matchCase ? 'g' : 'gi';
+
+      const counts = [];
+
+      for (let i = 0; i < finds.length; i++) {
+        const find = finds[i].value;
+        const replace = replaces[i].value;
+        if (find) {
+          let pattern = wholeWords ? `\\b${escapeRegExp(find)}\\b` : escapeRegExp(find);
+          let regex = new RegExp(pattern, flags);
+
+          // Count matches
+          let matchCount = 0;
+          const clone = new RegExp(pattern, flags);
+          while (clone.exec(text)) {
+            matchCount++;
+          }
+
+          text = text.replace(regex, replace);
+          counts.push(`${find} → ${replace}: ${matchCount} replacement${matchCount !== 1 ? 's' : ''}`);
+        }
+      }
+
+      document.getElementById("resultText").value = text;
+
+      // Display count results
+      const countDisplay = document.getElementById("replacementCounts");
+      if (counts.length > 0) {
+        countDisplay.innerHTML = `<strong>Replacements:</strong><br>➤ ` + counts.join('<br>➤ ');
+      } else {
+        countDisplay.innerHTML = '';
+      }
+    }
+
+    function copyResultText() {
+      const resultText = document.getElementById("resultText");
+      resultText.select();
+      resultText.setSelectionRange(0, 99999);
+
+      navigator.clipboard.writeText(resultText.value)
+        .then(() => {
+          const copyButton = document.getElementById("copyButton");
+          copyButton.textContent = "Copied!";
+          setTimeout(() => copyButton.textContent = "Copy Result", 2000);
+        })
+        .catch(err => console.error('Failed to copy text:', err));
+    }
+
+    let atBottom = false;
+
+    function toggleScroll() {
+      if (atBottom) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }
+      atBottom = !atBottom;
+      document.getElementById("scrollBtn").textContent = atBottom ? "↑" : "↓";
+    }
+  </script>
+
+  <button id="scrollBtn" onclick="toggleScroll()" title="Scroll">↓</button>
+
+</body>
+</html>
