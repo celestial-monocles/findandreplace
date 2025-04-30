@@ -69,29 +69,79 @@
     #resultText {
       background-color: #C7BAE3;
     }
-	
-	#scrollBtn {
-	  position: fixed;
-	  bottom: 20px;
-	  right: 20px;
-	  z-index: 99;
-	  border: none;
-	  outline: none;
-	  background-color: #C389EB;
-	  color: black;
-	  cursor: pointer;
-	  width: 48px;
-	  height: 48px;
-	  font-size: 24px;
-	  font-weight: bold;
-	  line-height: 1;
-	  border-radius: 50%;
-	  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+
+    button {
+      background-color: #B287CC;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: inherit;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #A84B8C;
+    }
+
+    #scrollBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 99;
+      background-color: #B287CC;
+      color: white;
+      width: 48px;
+      height: 48px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #replacementSection {
+	  margin-top: 20px;
+	  text-align: left;
 	  display: flex;
-	  align-items: center;
 	  justify-content: center;
-	  padding: 0;
+	  align-items: center;
+	  flex-direction: column;
 	}
+
+
+    #replacementDetails {
+      display: none;
+      margin-top: 10px;
+    }
+	
+	#inputBtn {
+	  background-color: #A84A46;
+	  color: white;
+	}
+
+	#inputBtn:hover {
+	  background-color: #A90101;
+	}
+	
+	#clearBtn {
+	  background-color: #A84A46;
+	  color: white;
+	}
+
+	#clearBtn:hover {
+	  background-color: #A90101;
+	}
+	
+	#toggleReplacementsBtn {
+	  background-color: #2a2a2a;
+	}
+
 
     @media (max-width: 768px) {
       .find-replace-pair {
@@ -132,13 +182,11 @@
   <div id="container">
     <h1>Find and Replace Text</h1>
 
-    <!-- Input Text Area + Clear Button -->
     <div id="inputAreaContainer">
       <textarea id="inputText" rows="10" placeholder="Enter your text here..."></textarea><br>
-      <button onclick="clearInputText()">Clear Input</button>
+      <button id="inputBtn" onclick="clearInputText()">Clear Input</button>
     </div>
 
-    <!-- Find/Replace Inputs + Buttons -->
     <h2>Find and Replace List</h2>
     <div id="findReplaceContainer">
       <div class="find-replace-pair">
@@ -150,26 +198,27 @@
       </div>
     </div>
     <button onclick="addFindReplacePair()">Add</button>
-    <button onclick="clearFindReplaceInputs()">Clear</button><br><br>
+    <button id="clearBtn" onclick="clearFindReplaceInputs()">Clear</button><br><br>
 
-    <!-- Toggle Options -->
     <div class="toggles">
       <label><input type="checkbox" id="matchCase"> Match Case</label>
       <label><input type="checkbox" id="wholeWords"> Whole Words</label>
     </div>
 
-    <!-- Replace Button -->
     <button onclick="replaceText()">Replace</button><br><br>
 
-    <!-- Output Area + Copy Button -->
     <h2>Result:</h2>
     <textarea id="resultText" rows="10" readonly></textarea><br><br>
-    <button id="copyButton" onclick="copyResultText()">Copy Result</button>
+    <button id="copyButton" onclick="copyResultText()" style="display:none;">Copy Result</button>
 
-    <div id="replacementCounts" style="margin-top: 20px;"></div>
+    <div id="replacementSection">
+      <button id="toggleReplacementsBtn" onclick="toggleReplacements()" style="display:none;">▼ Replacements</button>
+      <div id="replacementDetails"></div>
+    </div>
   </div>
 
-  <!-- Script -->
+  <button id="scrollBtn" onclick="toggleScroll()" title="Scroll">↓</button>
+
   <script>
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -201,6 +250,7 @@
 
     function clearInputText() {
       document.getElementById("inputText").value = '';
+      toggleCopyButtonVisibility();
     }
 
     function clearFindReplaceInputs() {
@@ -240,13 +290,42 @@
       }
 
       document.getElementById("resultText").value = text;
+      toggleCopyButtonVisibility();
 
-      // Display count results
-      const countDisplay = document.getElementById("replacementCounts");
+      const replacementDetails = document.getElementById("replacementDetails");
+      const toggleBtn = document.getElementById("toggleReplacementsBtn");
+
       if (counts.length > 0) {
-        countDisplay.innerHTML = `<strong>Replacements:</strong><br>➤ ` + counts.join('<br>➤ ');
+        replacementDetails.innerHTML = `➤ ` + counts.join('<br>➤ ');
+        toggleBtn.style.display = 'inline-block';
+        replacementDetails.style.display = 'none';
+        toggleBtn.textContent = "▼ Replacements";
       } else {
-        countDisplay.innerHTML = '';
+        replacementDetails.innerHTML = '';
+        toggleBtn.style.display = 'none';
+      }
+    }
+
+    function toggleReplacements() {
+      const details = document.getElementById("replacementDetails");
+      const toggleBtn = document.getElementById("toggleReplacementsBtn");
+
+      if (details.style.display === "none") {
+        details.style.display = "block";
+        toggleBtn.textContent = "▲ Replacements";
+      } else {
+        details.style.display = "none";
+        toggleBtn.textContent = "▼ Replacements";
+      }
+    }
+
+    function toggleCopyButtonVisibility() {
+      const resultText = document.getElementById("resultText");
+      const copyButton = document.getElementById("copyButton");
+      if (resultText.value.trim() === '') {
+        copyButton.style.display = 'none';
+      } else {
+        copyButton.style.display = 'inline-block';
       }
     }
 
@@ -276,8 +355,5 @@
       document.getElementById("scrollBtn").textContent = atBottom ? "↑" : "↓";
     }
   </script>
-
-  <button id="scrollBtn" onclick="toggleScroll()" title="Scroll">↓</button>
-
 </body>
 </html>
