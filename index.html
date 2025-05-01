@@ -50,6 +50,16 @@
       margin-top: 2px;
     }
 
+    .drag-handle {
+      cursor: move;
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .dragging {
+      opacity: 0.5;
+    }
+
     #inputAreaContainer {
       margin-bottom: 20px;
     }
@@ -106,42 +116,40 @@
     }
 
     #replacementSection {
-	  margin-top: 20px;
-	  text-align: left;
-	  display: flex;
-	  justify-content: center;
-	  align-items: center;
-	  flex-direction: column;
-	}
-
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
 
     #replacementDetails {
       display: none;
       margin-top: 10px;
     }
-	
-	#inputBtn {
-	  background-color: #A84A46;
-	  color: white;
-	}
 
-	#inputBtn:hover {
-	  background-color: #A90101;
-	}
-	
-	#clearBtn {
-	  background-color: #A84A46;
-	  color: white;
-	}
+    #inputBtn {
+      background-color: #A84A46;
+      color: white;
+    }
 
-	#clearBtn:hover {
-	  background-color: #A90101;
-	}
-	
-	#toggleReplacementsBtn {
-	  background-color: #2a2a2a;
-	}
+    #inputBtn:hover {
+      background-color: #A90101;
+    }
 
+    #clearBtn {
+      background-color: #A84A46;
+      color: white;
+    }
+
+    #clearBtn:hover {
+      background-color: #A90101;
+    }
+
+    #toggleReplacementsBtn {
+      background-color: #2a2a2a;
+    }
 
     @media (max-width: 768px) {
       .find-replace-pair {
@@ -152,7 +160,8 @@
 
       .find-replace-pair label,
       .find-replace-pair input,
-      .remove-button {
+      .remove-button,
+      .drag-handle {
         width: 100%;
         margin: 5px 0;
       }
@@ -190,6 +199,7 @@
     <h2>Find and Replace List</h2>
     <div id="findReplaceContainer">
       <div class="find-replace-pair">
+        <span class="drag-handle">☰</span>
         <label>Find: </label>
         <input type="text" class="find" placeholder="Find">
         <label>Replace with: </label>
@@ -219,6 +229,9 @@
 
   <button id="scrollBtn" onclick="toggleScroll()" title="Scroll">↓</button>
 
+  <!-- SortableJS -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
   <script>
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -229,6 +242,7 @@
       const newPair = document.createElement('div');
       newPair.classList.add('find-replace-pair');
       newPair.innerHTML = `
+        <span class="drag-handle">☰</span>
         <label>Find: </label>
         <input type="text" class="find" placeholder="Find">
         <label>Replace with: </label>
@@ -322,11 +336,7 @@
     function toggleCopyButtonVisibility() {
       const resultText = document.getElementById("resultText");
       const copyButton = document.getElementById("copyButton");
-      if (resultText.value.trim() === '') {
-        copyButton.style.display = 'none';
-      } else {
-        copyButton.style.display = 'inline-block';
-      }
+      copyButton.style.display = resultText.value.trim() === '' ? 'none' : 'inline-block';
     }
 
     function copyResultText() {
@@ -354,6 +364,13 @@
       atBottom = !atBottom;
       document.getElementById("scrollBtn").textContent = atBottom ? "↑" : "↓";
     }
+
+    // Enable sortable reordering
+    new Sortable(document.getElementById('findReplaceContainer'), {
+      animation: 150,
+      handle: '.drag-handle',
+      ghostClass: 'dragging'
+    });
   </script>
 </body>
 </html>
