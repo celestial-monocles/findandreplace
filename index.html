@@ -70,10 +70,20 @@
 
     textarea {
       width: 100%;
+      font-family: monospace;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      box-sizing: border-box;
     }
 
     #resultText {
       background-color: #C7BAE3;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: monospace;
+      min-height: 200px;
     }
 
     button {
@@ -188,7 +198,7 @@
 
     <div id="findReplaceContainer"></div>
     <button onclick="addFindReplacePair()">Add</button>
-    <button id="clearBtn" onclick="clearFindReplaceInputs()">Clear</button>
+    <button id="clearFindBtn" onclick="clearFindReplaceInputs()">Clear</button>
 
     <div class="toggles">
       <label><input type="checkbox" id="matchCase"> Match Case</label>
@@ -246,7 +256,7 @@
     }
 
     function replaceText() {
-      let text = document.getElementById("inputText").value;
+      let text = document.getElementById("inputText").value.replace(/[\u2028\u2029]/g, "\n");
       const finds = document.querySelectorAll('.find');
       const replaces = document.querySelectorAll('.replace');
       const matchCase = document.getElementById("matchCase").checked;
@@ -311,11 +321,13 @@
 
     function copyResultText() {
       const resultText = document.getElementById("resultText");
-      resultText.select();
-      document.execCommand('copy');
-      const copyButton = document.getElementById("copyButton");
-      copyButton.textContent = "Copied!";
-      setTimeout(() => copyButton.textContent = "Copy Result", 2000);
+      navigator.clipboard.writeText(resultText.value)
+        .then(() => {
+          const copyButton = document.getElementById("copyButton");
+          copyButton.textContent = "Copied!";
+          setTimeout(() => copyButton.textContent = "Copy Result", 2000);
+        })
+        .catch(() => alert("Copy failed"));
     }
 
     function exportList() {
@@ -375,6 +387,11 @@
 
     window.onload = () => {
       addFindReplacePair();
+      // Make sure copy button is hidden initially
+      toggleCopyButtonVisibility();
+
+      // Toggle copy button visibility dynamically when input changes
+      document.getElementById("inputText").addEventListener("input", toggleCopyButtonVisibility);
     };
   </script>
 </body>
