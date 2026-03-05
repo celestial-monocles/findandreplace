@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Find and Replace</title>
+  <title>Find and Replace + Hover Insert</title>
   <style>
     * {
       box-sizing: border-box;
@@ -29,38 +29,119 @@
       text-align: center;
     }
 
+    .pair-wrapper {
+      position: relative;
+      margin-bottom: 2px;
+    }
+
+    /* Insert button - hidden by default */
+    .insert-btn {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 28px;
+      background-color: #9f6eb0;
+      color: white;
+      border-radius: 50%;
+      border: 2px solid #d4b3e6;
+      font-size: 20px;
+      font-weight: bold;
+      display: none;  /* Hidden by default */
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      transition: all 0.15s ease;
+      line-height: 1;
+      z-index: 10;
+      top: -14px;  /* Positioned between rows */
+    }
+
+    /* Show button when hovering over the wrapper */
+    .pair-wrapper:hover .insert-btn {
+      display: flex;
+    }
+
+    .insert-btn:hover {
+      background-color: #b87fd0;
+      transform: translateX(-50%) scale(1.1);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.8);
+    }
+
+    .insert-btn:active {
+      background-color: #8a5ca0;
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    /* First wrapper's button positioned at top */
+    .pair-wrapper:first-child .insert-btn {
+      top: -14px;
+    }
+
+    /* Ensure button doesn't overlap with content */
     .find-replace-pair {
-      margin-bottom: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       background-color: #1f1f1f;
-      padding: 10px;
+      padding: 12px 10px;
       border-radius: 6px;
+      margin: 8px 0 4px 0;  /* Increased margin to make room for button */
+      border: 1px solid #3a3a3a;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Extra top margin for first row to prevent button from being cut off */
+    .pair-wrapper:first-child .find-replace-pair {
+      margin-top: 12px;
     }
 
     .find-replace-pair label {
       margin-right: 10px;
+      color: #B5AEE8;
+      font-size: 0.95em;
     }
 
     .find-replace-pair input {
       margin-right: 10px;
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+
+    .find-replace-pair input:focus {
+      outline: 2px solid #9f6eb0;
+      border-color: transparent;
     }
 
     .remove-button {
       margin-left: 10px;
-      color: red;
+      color: #ff6b6b;
       cursor: pointer;
       font-weight: bold;
-      margin-top: 2px;
+      font-size: 18px;
+      transition: color 0.2s;
+    }
+
+    .remove-button:hover {
+      color: #ff0000;
     }
 
     .drag-handle {
       cursor: move;
-      margin-right: 10px;
-      font-size: 18px;
+      margin-right: 12px;
+      font-size: 20px;
       color: #B287CC;
       user-select: none;
+    }
+
+    .drag-handle:hover {
+      color: #d4b3e6;
     }
 
     #inputAreaContainer {
@@ -69,11 +150,16 @@
     }
 
     .toggles {
-      margin-bottom: 20px;
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #1f1f1f;
+      border-radius: 6px;
     }
 
     .toggles label {
-      margin-right: 15px;
+      margin-right: 25px;
+      color: #B5AEE8;
+      cursor: pointer;
     }
 
     textarea {
@@ -81,10 +167,12 @@
       font-family: monospace;
       white-space: pre-wrap;
       word-wrap: break-word;
-      padding: 10px;
+      padding: 15px;
       border-radius: 6px;
       border: none;
       resize: vertical;
+      background-color: #333;
+      color: #fff;
     }
 
     #inputText {
@@ -93,11 +181,8 @@
 
     #resultText {
       background-color: #C7BAE3;
-      color: #000;
+      color: #1a1a1a;
       height: 150px;
-      border: none;
-      border-radius: 6px;
-      resize: vertical;
     }
 
     button {
@@ -119,7 +204,6 @@
 
     #clearBtn {
       background-color: #A84A46;
-      color: white;
     }
 
     #clearBtn:hover {
@@ -136,12 +220,16 @@
       width: 48px;
       height: 48px;
       font-size: 24px;
-      font-weight: bold;
       border-radius: 50%;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+    }
+
+    #scrollBtn:hover {
+      background-color: #A84B8C;
     }
 
     #replacementSection {
@@ -156,40 +244,59 @@
     #replacementDetails {
       display: none;
       margin-top: 10px;
+      padding: 15px;
+      background-color: #1f1f1f;
+      border-radius: 6px;
+      color: #B5AEE8;
+      width: 100%;
     }
 
     #toggleReplacementsBtn {
       background-color: #2a2a2a;
+      border: 1px solid #B287CC;
+    }
+
+    #toggleReplacementsBtn:hover {
+      background-color: #3a3a3a;
     }
 
     #toggleFindReplaceBtn {
       background-color: transparent;
       color: #B5AEE8;
       font-size: 1.2em;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
+      border: 1px solid #B287CC;
     }
 
     #pasteBtn {
       position: absolute;
       top: 10px;
       right: 10px;
-      padding: 5px 10px;
-      font-size: 0.8em;
+      padding: 5px 15px;
+      font-size: 0.9em;
       background-color: #B287CC;
       z-index: 1;
     }
 
-    #pasteBtn:hover {
-      background-color: #A84B8C;
+    /* Bottom insert button - always visible */
+    .bottom-insert {
+      display: flex;
+      justify-content: center;
+      margin: 15px 0 10px 0;
+    }
+
+    .bottom-insert .insert-btn {
+      position: relative;
+      display: flex;
+      transform: none;
+      left: auto;
+      top: auto;
     }
 
     @media (max-width: 768px) {
       .find-replace-pair {
         flex-direction: column;
         align-items: stretch;
-        text-align: left;
+        padding: 15px 10px;
       }
 
       .find-replace-pair label,
@@ -198,6 +305,22 @@
       .drag-handle {
         width: 100%;
         margin: 5px 0;
+      }
+
+      .drag-handle {
+        text-align: center;
+        font-size: 24px;
+      }
+
+      .remove-button {
+        text-align: center;
+      }
+
+      .insert-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 22px;
+        top: -16px;
       }
 
       button {
@@ -219,20 +342,13 @@
         margin-bottom: 10px;
       }
 
-      /* Fix for paste button in mobile */
       #pasteBtn {
         position: relative;
         top: auto;
         right: auto;
         display: block;
-        width: auto;
+        width: 100%;
         margin: 5px 0;
-        text-align: center;
-      }
-
-      #inputAreaContainer {
-        display: flex;
-        flex-direction: column;
       }
     }
   </style>
@@ -256,9 +372,17 @@
       <button onclick="importList()">Import List</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
 
+      <!-- Container for find/replace pairs with hover buttons -->
       <div id="findReplaceContainer"></div>
-      <button onclick="addFindReplacePair()">Add</button>
-      <button id="clearFindBtn" onclick="clearFindReplaceInputs()">Clear</button>
+
+      <!-- Bottom insert button (always visible) -->
+      <div class="bottom-insert">
+        <span class="insert-btn" onclick="addFindReplacePair()" title="Add new row at bottom">+</span>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <button id="clearFindBtn" onclick="clearFindReplaceInputs()">Clear All</button>
+      </div>
 
       <div class="toggles">
         <label><input type="checkbox" id="matchCase"> Match Case</label>
@@ -285,12 +409,11 @@
   <script>
     document.getElementById("inputText").addEventListener("keydown", function(event) {
       if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault(); // Prevent newline
+        event.preventDefault();
         replaceText();
       }
     });
 
-    // Add paste functionality
     document.getElementById("pasteBtn").addEventListener("click", async function() {
       try {
         const text = await navigator.clipboard.readText();
@@ -306,60 +429,206 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    // Create a single find/replace pair element (without wrapper)
+    function createPairElement(findValue = '', replaceValue = '') {
+      const pairDiv = document.createElement('div');
+      pairDiv.className = 'find-replace-pair';
+      
+      // Escape quotes for HTML attributes
+      const escapedFind = findValue.replace(/"/g, '&quot;');
+      const escapedReplace = replaceValue.replace(/"/g, '&quot;');
+      
+      pairDiv.innerHTML = `
+        <span class="drag-handle" title="Drag to reorder">☰</span>
+        <label>Find:</label>
+        <input class="find" type="text" value="${escapedFind}" placeholder="text to find">
+        <label>Replace:</label>
+        <input class="replace" type="text" value="${escapedReplace}" placeholder="replace with">
+        <span class="remove-button" onclick="removePair(this)" title="Remove this row">✖</span>
+      `;
+      return pairDiv;
+    }
+
+    // Create a wrapper with hover insert button
+    function createWrapperWithButton(find = '', replace = '') {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'pair-wrapper';
+      
+      // Create insert button (hidden by default via CSS)
+      const insertBtn = document.createElement('span');
+      insertBtn.className = 'insert-btn';
+      insertBtn.textContent = '+';
+      insertBtn.setAttribute('title', 'Insert new row above');
+      
+      // Add click handler to insert a new row above this wrapper
+      insertBtn.onclick = function(e) {
+        e.stopPropagation();
+        const currentWrapper = this.closest('.pair-wrapper');
+        const container = document.getElementById('findReplaceContainer');
+        const newWrapper = createWrapperWithButton('', '');
+        container.insertBefore(newWrapper, currentWrapper);
+        reinitSortable();
+      };
+      
+      // Create the pair element
+      const pair = createPairElement(find, replace);
+      
+      // Assemble wrapper: button first, then pair
+      wrapper.appendChild(insertBtn);
+      wrapper.appendChild(pair);
+      
+      return wrapper;
+    }
+
+    // Initialize or reset the container
+    function renderPairsFromArray(pairsArray) {
+      const container = document.getElementById('findReplaceContainer');
+      container.innerHTML = '';
+      
+      if (pairsArray.length === 0) {
+        // Always show at least one empty pair
+        container.appendChild(createWrapperWithButton('', ''));
+      } else {
+        pairsArray.forEach(p => {
+          container.appendChild(createWrapperWithButton(p.find || '', p.replace || ''));
+        });
+      }
+      
+      reinitSortable();
+    }
+
+    // Get current pairs as array of objects
+    function getCurrentPairs() {
+      const wrappers = document.querySelectorAll('#findReplaceContainer .pair-wrapper');
+      const pairs = [];
+      
+      wrappers.forEach(wrapper => {
+        const findInput = wrapper.querySelector('.find');
+        const replaceInput = wrapper.querySelector('.replace');
+        if (findInput && replaceInput) {
+          pairs.push({
+            find: findInput.value,
+            replace: replaceInput.value
+          });
+        }
+      });
+      
+      return pairs;
+    }
+
+    // Add new pair at the bottom
     function addFindReplacePair(find = '', replace = '') {
       const container = document.getElementById('findReplaceContainer');
-      const div = document.createElement('div');
-      div.className = 'find-replace-pair';
-      div.innerHTML = `
-        <span class="drag-handle" title="Drag">☰</span>
-        <label>Find:</label><input class="find" value="${find}">
-        <label>Replace:</label><input class="replace" value="${replace}">
-        <span class="remove-button" onclick="removePair(this)">✖</span>
-      `;
-      container.appendChild(div);
+      const newWrapper = createWrapperWithButton(find, replace);
+      container.appendChild(newWrapper);
+      reinitSortable();
     }
 
-    function removePair(button) {
+    // Remove a pair (called from remove button)
+    function removePair(removeSpan) {
+      const wrapper = removeSpan.closest('.pair-wrapper');
       const container = document.getElementById('findReplaceContainer');
-      if (container.children.length > 1) button.parentElement.remove();
-      else alert("At least one pair must remain.");
+      
+      if (container.children.length <= 1) {
+        alert("At least one pair must remain.");
+        return;
+      }
+      
+      wrapper.remove();
+      reinitSortable();
     }
 
-    function clearInputText() {
-      document.getElementById("inputText").value = '';
-      toggleCopyButtonVisibility();
-    }
-
+    // Clear all pairs and add one empty
     function clearFindReplaceInputs() {
-      document.getElementById('findReplaceContainer').innerHTML = '';
-      addFindReplacePair();
+      const container = document.getElementById('findReplaceContainer');
+      container.innerHTML = '';
+      container.appendChild(createWrapperWithButton('', ''));
+      reinitSortable();
     }
 
+    // Sortable instance for drag-drop
+    let sortableInstance = null;
+
+    function reinitSortable() {
+      if (sortableInstance) {
+        sortableInstance.destroy();
+      }
+      
+      const container = document.getElementById('findReplaceContainer');
+      sortableInstance = new Sortable(container, {
+        animation: 150,
+        handle: '.drag-handle',
+        ghostClass: 'dragging',
+        dragClass: 'dragging',
+        onEnd: function() {
+          // Optional: any reorder logic
+        }
+      });
+    }
+
+    // Initialize on page load
+    window.onload = () => {
+      // Start with one empty pair - buttons will be hidden by default
+      renderPairsFromArray([{ find: '', replace: '' }]);
+      toggleCopyButtonVisibility();
+    };
+
+    // Export current list to JSON
+    function exportList() {
+      const pairs = getCurrentPairs();
+      const blob = new Blob([JSON.stringify(pairs, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'find_replace_list.json';
+      a.click();
+    }
+
+    // Trigger import file picker
+    function importList() {
+      document.getElementById('importFile').click();
+    }
+
+    // Handle imported JSON file
+    function handleImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const list = JSON.parse(e.target.result);
+          if (!Array.isArray(list)) throw new Error("Invalid format");
+          renderPairsFromArray(list);
+        } catch (err) {
+          alert("Failed to import list. Ensure it's valid JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Replace text function (unchanged)
     function replaceText() {
       let text = document.getElementById("inputText").value;
 
       // Normalize line breaks
       text = text.replace(/[\u2028\u2029\u0085\u000B\u000C]/g, '\n').replace(/\r\n|\r/g, '\n');
 
-      const finds = document.querySelectorAll('.find');
-      const replaces = document.querySelectorAll('.replace');
+      const pairs = getCurrentPairs();
       const matchCase = document.getElementById("matchCase").checked;
       const wholeWords = document.getElementById("wholeWords").checked;
       const flags = matchCase ? 'g' : 'gi';
 
       const counts = [];
 
-      finds.forEach((findEl, i) => {
-        const find = findEl.value;
-        const replace = replaces[i].value;
-        if (find) {
+      pairs.forEach(({ find, replace }) => {
+        if (find && find.trim() !== '') {
           let pattern = wholeWords ? `\\b${escapeRegExp(find)}\\b` : escapeRegExp(find);
           try {
             const regex = new RegExp(pattern, flags);
             const matchCount = (text.match(regex) || []).length;
             text = text.replace(regex, replace);
             if (matchCount > 0) {
-              counts.push(`Replaced " ${find} " with " ${replace} " ${matchCount} time(s)`);
+              counts.push(`Replaced "${find}" with "${replace}" (${matchCount} time${matchCount !== 1 ? 's' : ''})`);
             }
           } catch (e) {
             console.error(`Invalid pattern "${pattern}"`, e);
@@ -375,10 +644,10 @@
       const toggleBtn = document.getElementById("toggleReplacementsBtn");
 
       if (counts.length > 0) {
-        replacementDetails.innerHTML = `➤ ` + counts.join('<br>➤ ');
+        replacementDetails.innerHTML = '• ' + counts.join('<br>• ');
         toggleBtn.style.display = 'inline-block';
         replacementDetails.style.display = 'none';
-        toggleBtn.textContent = "- Replacements";
+        toggleBtn.textContent = "▼ Replacements";
       } else {
         replacementDetails.innerHTML = '';
         toggleBtn.style.display = 'none';
@@ -391,10 +660,10 @@
 
       if (details.style.display === "none") {
         details.style.display = "block";
-        toggleBtn.textContent = "+ Replacements";
+        toggleBtn.textContent = "▲ Replacements";
       } else {
         details.style.display = "none";
-        toggleBtn.textContent = "- Replacements";
+        toggleBtn.textContent = "▼ Replacements";
       }
     }
 
@@ -422,42 +691,9 @@
         });
     }
 
-    function exportList() {
-      const pairs = Array.from(document.querySelectorAll('.find-replace-pair')).map(pair => {
-        return {
-          find: pair.querySelector('.find').value,
-          replace: pair.querySelector('.replace').value
-        };
-      });
-      const blob = new Blob([JSON.stringify(pairs, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'find_replace_list.json';
-      a.click();
-    }
-
-    function importList() {
-      const input = document.getElementById('importFile');
-      input.value = '';
-      input.click();
-    }
-
-    function handleImport(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const list = JSON.parse(e.target.result);
-          if (!Array.isArray(list)) throw new Error("Invalid format");
-          const container = document.getElementById('findReplaceContainer');
-          container.innerHTML = '';
-          list.forEach(({ find, replace }) => addFindReplacePair(find, replace));
-        } catch (err) {
-          alert("Failed to import list. Ensure it's valid JSON.");
-        }
-      };
-      reader.readAsText(file);
+    function clearInputText() {
+      document.getElementById("inputText").value = '';
+      toggleCopyButtonVisibility();
     }
 
     let atBottom = false;
@@ -484,16 +720,6 @@
         btn.textContent = "▲ Find and Replace List";
       }
     }
-
-    new Sortable(document.getElementById('findReplaceContainer'), {
-      animation: 150,
-      handle: '.drag-handle',
-    });
-
-    window.onload = () => {
-      addFindReplacePair();
-      toggleCopyButtonVisibility();
-    };
   </script>
 </body>
 </html>
