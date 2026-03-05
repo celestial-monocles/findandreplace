@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Find and Replace + Hover Insert</title>
+  <title>Find and Replace + Hover Insert (clean)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -149,10 +149,11 @@
       position: relative;
     }
 
+    /* toggles container – removed black background */
     .toggles {
       margin: 20px 0;
       padding: 10px;
-      background-color: #1f1f1f;
+      /* background-color: #1f1f1f;  <-- removed dark background */
       border-radius: 6px;
     }
 
@@ -260,11 +261,18 @@
       background-color: #3a3a3a;
     }
 
+    /* main toggle button – outline removed */
     #toggleFindReplaceBtn {
       background-color: transparent;
       color: #B5AEE8;
       font-size: 1.2em;
       border: 1px solid #B287CC;
+      outline: none;        /* remove default outline */
+      box-shadow: none;     /* ensure no focus ring */
+    }
+    #toggleFindReplaceBtn:focus {
+      outline: none;        /* also remove on focus */
+      border-color: #B287CC; /* keep border consistent */
     }
 
     #pasteBtn {
@@ -384,6 +392,7 @@
         <button id="clearFindBtn" onclick="clearFindReplaceInputs()">Clear All</button>
       </div>
 
+      <!-- toggles: background removed via CSS (no dark background) -->
       <div class="toggles">
         <label><input type="checkbox" id="matchCase"> Match Case</label>
         <label><input type="checkbox" id="wholeWords"> Whole Words</label>
@@ -441,7 +450,7 @@
       pairDiv.innerHTML = `
         <span class="drag-handle" title="Drag to reorder">☰</span>
         <label>Find:</label>
-        <input class="find" type="text" value="${escapedFind}" placeholder="text to find">
+        <input class="find" type="text" value="${escapedFind}" placeholder="find text">
         <label>Replace:</label>
         <input class="replace" type="text" value="${escapedReplace}" placeholder="replace with">
         <span class="remove-button" onclick="removePair(this)" title="Remove this row">✖</span>
