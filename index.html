@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Find and Replace</title>
+  <title>Find and Replace · Deduplicate + Conflict Check</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: Georgia, serif;
       margin: 20px;
@@ -16,25 +13,17 @@
       background-color: #2a2a2a;
       color: #B5AEE8;
     }
-
-    a {
-      color: #B5AEE8;
-      text-decoration: none;
-    }
-
+    a { color: #B5AEE8; text-decoration: none; }
     #container {
       max-width: 800px;
       margin: 0 auto;
       padding: 20px;
       text-align: center;
     }
-
     .pair-wrapper {
       position: relative;
       margin-bottom: 2px;
     }
-
-    /* Insert button - hidden by default */
     .insert-btn {
       position: absolute;
       left: 50%;
@@ -47,7 +36,7 @@
       border: 2px solid #d4b3e6;
       font-size: 20px;
       font-weight: bold;
-      display: none;  /* Hidden by default */
+      display: none;
       align-items: center;
       justify-content: center;
       cursor: pointer;
@@ -55,31 +44,19 @@
       transition: all 0.15s ease;
       line-height: 1;
       z-index: 10;
-      top: -14px;  /* Positioned between rows */
+      top: -14px;
     }
-
-    /* Show button when hovering over the wrapper */
-    .pair-wrapper:hover .insert-btn {
-      display: flex;
-    }
-
+    .pair-wrapper:hover .insert-btn { display: flex; }
     .insert-btn:hover {
       background-color: #b87fd0;
       transform: translateX(-50%) scale(1.1);
       box-shadow: 0 3px 10px rgba(0,0,0,0.8);
     }
-
     .insert-btn:active {
       background-color: #8a5ca0;
       transform: translateX(-50%) scale(0.95);
     }
-
-    /* First wrapper's button positioned at top */
-    .pair-wrapper:first-child .insert-btn {
-      top: -14px;
-    }
-
-    /* Ensure button doesn't overlap with content */
+    .pair-wrapper:first-child .insert-btn { top: -14px; }
     .find-replace-pair {
       display: flex;
       align-items: center;
@@ -87,23 +64,17 @@
       background-color: #1f1f1f;
       padding: 12px 10px;
       border-radius: 6px;
-      margin: 8px 0 4px 0;  /* Increased margin to make room for button */
+      margin: 8px 0 4px 0;
       border: 1px solid #3a3a3a;
       position: relative;
       z-index: 1;
     }
-
-    /* Extra top margin for first row to prevent button from being cut off */
-    .pair-wrapper:first-child .find-replace-pair {
-      margin-top: 12px;
-    }
-
+    .pair-wrapper:first-child .find-replace-pair { margin-top: 12px; }
     .find-replace-pair label {
       margin-right: 10px;
       color: #B5AEE8;
       font-size: 0.95em;
     }
-
     .find-replace-pair input {
       margin-right: 10px;
       background-color: #333;
@@ -113,12 +84,10 @@
       border-radius: 4px;
       font-family: inherit;
     }
-
     .find-replace-pair input:focus {
       outline: 2px solid #9f6eb0;
       border-color: transparent;
     }
-
     .remove-button {
       margin-left: 10px;
       color: #ff6b6b;
@@ -127,11 +96,7 @@
       font-size: 18px;
       transition: color 0.2s;
     }
-
-    .remove-button:hover {
-      color: #ff0000;
-    }
-
+    .remove-button:hover { color: #ff0000; }
     .drag-handle {
       cursor: move;
       margin-right: 12px;
@@ -139,30 +104,21 @@
       color: #B287CC;
       user-select: none;
     }
-
-    .drag-handle:hover {
-      color: #d4b3e6;
-    }
-
+    .drag-handle:hover { color: #d4b3e6; }
     #inputAreaContainer {
       margin-bottom: 20px;
       position: relative;
     }
-
-    /* toggles container – removed black background */
     .toggles {
       margin: 20px 0;
       padding: 10px;
-      /* background-color: #1f1f1f;  <-- removed dark background */
       border-radius: 6px;
     }
-
     .toggles label {
       margin-right: 25px;
       color: #B5AEE8;
       cursor: pointer;
     }
-
     textarea {
       width: 100%;
       font-family: monospace;
@@ -175,17 +131,12 @@
       background-color: #333;
       color: #fff;
     }
-
-    #inputText {
-      height: 150px;
-    }
-
+    #inputText { height: 150px; }
     #resultText {
       background-color: #C7BAE3;
       color: #1a1a1a;
       height: 150px;
     }
-
     button {
       background-color: #B287CC;
       color: white;
@@ -198,19 +149,9 @@
       font-family: inherit;
       transition: background-color 0.2s ease;
     }
-
-    button:hover {
-      background-color: #A84B8C;
-    }
-
-    #clearBtn {
-      background-color: #A84A46;
-    }
-
-    #clearBtn:hover {
-      background-color: #A90101;
-    }
-
+    button:hover { background-color: #A84B8C; }
+    #clearBtn { background-color: #A84A46; }
+    #clearBtn:hover { background-color: #A90101; }
     #scrollBtn {
       position: fixed;
       bottom: 20px;
@@ -228,11 +169,7 @@
       justify-content: center;
       cursor: pointer;
     }
-
-    #scrollBtn:hover {
-      background-color: #A84B8C;
-    }
-
+    #scrollBtn:hover { background-color: #A84B8C; }
     #replacementSection {
       margin-top: 20px;
       text-align: left;
@@ -241,7 +178,6 @@
       align-items: center;
       flex-direction: column;
     }
-
     #replacementDetails {
       display: none;
       margin-top: 10px;
@@ -251,30 +187,23 @@
       color: #B5AEE8;
       width: 100%;
     }
-
     #toggleReplacementsBtn {
       background-color: #2a2a2a;
       border: 1px solid #B287CC;
     }
-
-    #toggleReplacementsBtn:hover {
-      background-color: #3a3a3a;
-    }
-
-    /* main toggle button – outline removed */
+    #toggleReplacementsBtn:hover { background-color: #3a3a3a; }
     #toggleFindReplaceBtn {
       background-color: transparent;
       color: #B5AEE8;
       font-size: 1.2em;
       border: 1px solid #B287CC;
-      outline: none;        /* remove default outline */
-      box-shadow: none;     /* ensure no focus ring */
+      outline: none;
+      box-shadow: none;
     }
     #toggleFindReplaceBtn:focus {
-      outline: none;        /* also remove on focus */
-      border-color: #B287CC; /* keep border consistent */
+      outline: none;
+      border-color: #B287CC;
     }
-
     #pasteBtn {
       position: absolute;
       top: 10px;
@@ -284,14 +213,11 @@
       background-color: #B287CC;
       z-index: 1;
     }
-
-    /* Bottom insert button - always visible */
     .bottom-insert {
       display: flex;
       justify-content: center;
       margin: 15px 0 10px 0;
     }
-
     .bottom-insert .insert-btn {
       position: relative;
       display: flex;
@@ -299,14 +225,38 @@
       left: auto;
       top: auto;
     }
-
+    #dedupeNotify {
+      margin: 6px 0 10px 0;
+      background: #3a2a3a;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: #d4b3e6;
+      border: 1px solid #7a4a7a;
+      display: none;
+    }
+    #conflictNotify {
+      margin: 6px 0 10px 0;
+      background: #3a2a2a;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: #ffb3b3;
+      border: 1px solid #aa4a4a;
+      display: none;
+    }
+    .notify-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
     @media (max-width: 768px) {
       .find-replace-pair {
         flex-direction: column;
         align-items: stretch;
         padding: 15px 10px;
       }
-
       .find-replace-pair label,
       .find-replace-pair input,
       .remove-button,
@@ -314,42 +264,13 @@
         width: 100%;
         margin: 5px 0;
       }
-
-      .drag-handle {
-        text-align: center;
-        font-size: 24px;
-      }
-
-      .remove-button {
-        text-align: center;
-      }
-
-      .insert-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 22px;
-        top: -16px;
-      }
-
-      button {
-        width: 100%;
-        margin: 5px 0;
-      }
-
-      #copyButton {
-        width: 100%;
-      }
-
-      .toggles {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .toggles label {
-        margin-bottom: 10px;
-      }
-
+      .drag-handle { text-align: center; font-size: 24px; }
+      .remove-button { text-align: center; }
+      .insert-btn { width: 32px; height: 32px; font-size: 22px; top: -16px; }
+      button { width: 100%; margin: 5px 0; }
+      #copyButton { width: 100%; }
+      .toggles { flex-direction: column; align-items: flex-start; }
+      .toggles label { margin-bottom: 10px; }
       #pasteBtn {
         position: relative;
         top: auto;
@@ -362,91 +283,173 @@
   </style>
 </head>
 <body>
-  <div id="container">
-    <h1><a href="https://celestial-monocles.github.io/findandreplace/">Find and Replace Text</a></h1>
+<div id="container">
+  <h1><a href="https://celestial-monocles.github.io/findandreplace/">Find and Replace Text</a></h1>
 
-    <div id="inputAreaContainer">
-      <textarea id="inputText" rows="10" placeholder="Enter your text here..."></textarea>
-      <button id="pasteBtn" title="Paste from clipboard">Paste</button>
-    </div>
-    <button id="clearBtn" onclick="clearInputText()">Clear Input</button>
+  <div id="inputAreaContainer">
+    <textarea id="inputText" rows="10" placeholder="Enter your text here..."></textarea>
+    <button id="pasteBtn" title="Paste from clipboard">Paste</button>
+  </div>
+  <button id="clearBtn" onclick="clearInputText()">Clear Input</button>
 
-    <h2>
-      <button onclick="toggleFindReplaceSection()" id="toggleFindReplaceBtn">▼ Find and Replace List</button>
-    </h2>
+  <h2>
+    <button onclick="toggleFindReplaceSection()" id="toggleFindReplaceBtn">▼ Find and Replace List</button>
+  </h2>
 
-    <div id="findReplaceSection" style="display: block;">
-      <button onclick="exportList()">Export List</button>
-      <button onclick="importList()">Import List</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+  <div id="findReplaceSection" style="display: block;">
+    <button onclick="exportList()">Export List</button>
+    <button onclick="importList()">Import List</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
 
-      <!-- Container for find/replace pairs with hover buttons -->
-      <div id="findReplaceContainer"></div>
+    <div id="findReplaceContainer"></div>
 
-      <!-- Bottom insert button (always visible) -->
-      <div class="bottom-insert">
-        <span class="insert-btn" onclick="addFindReplacePair()" title="Add new row at bottom">+</span>
-      </div>
-
-      <div style="margin-top: 10px;">
-        <button id="clearFindBtn" onclick="clearFindReplaceInputs()">Clear All</button>
-      </div>
-
-      <!-- toggles: background removed via CSS (no dark background) -->
-      <div class="toggles">
-        <label><input type="checkbox" id="matchCase"> Match Case</label>
-        <label><input type="checkbox" id="wholeWords"> Whole Words</label>
-      </div>
+    <div class="bottom-insert">
+      <span class="insert-btn" onclick="addFindReplacePair()" title="Add new row at bottom">+</span>
     </div>
 
-    <button onclick="replaceText()">Replace</button><br><br>
+    <div style="margin-top: 10px;">
+      <button id="clearFindBtn" onclick="clearFindReplaceInputs()">Clear All</button>
+    </div>
 
-    <h2>Result:</h2>
-    <textarea id="resultText" rows="10" readonly></textarea>
-    <button id="copyButton" onclick="copyResultText()" style="display:none">Copy Result</button>
+    <div class="toggles">
+      <label><input type="checkbox" id="matchCase"> Match Case</label>
+      <label><input type="checkbox" id="wholeWords"> Whole Words</label>
+    </div>
+    
+    <div class="notify-container">
+      <div id="dedupeNotify"></div>
+      <div id="conflictNotify"></div>
+    </div>
   </div>
 
-  <div id="replacementSection">
-    <button id="toggleReplacementsBtn" onclick="toggleReplacements()" style="display:none;">- Replacements</button>
-    <div id="replacementDetails"></div>
-  </div>
+  <button onclick="replaceText()">Replace</button><br><br>
 
-  <button id="scrollBtn" onclick="toggleScroll()" title="Scroll">↓</button>
+  <h2>Result:</h2>
+  <textarea id="resultText" rows="10" readonly></textarea>
+  <button id="copyButton" onclick="copyResultText()" style="display:none">Copy Result</button>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<div id="replacementSection">
+  <button id="toggleReplacementsBtn" onclick="toggleReplacements()" style="display:none;">- Replacements</button>
+  <div id="replacementDetails"></div>
+</div>
 
-  <script>
-    document.getElementById("inputText").addEventListener("keydown", function(event) {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        replaceText();
-      }
-    });
+<button id="scrollBtn" onclick="toggleScroll()" title="Scroll">↓</button>
 
-    document.getElementById("pasteBtn").addEventListener("click", async function() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById("inputText").value = text;
-        toggleCopyButtonVisibility();
-      } catch (err) {
-        alert("Failed to paste. Please ensure clipboard permissions are granted.");
-        console.error("Failed to read clipboard contents:", err);
-      }
-    });
-
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+  (function(){
+    // ---- core helpers ----
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // Create a single find/replace pair element (without wrapper)
+    // ---- check for conflicts (same find, different replace) ----
+    function findConflicts(pairs) {
+      const findMap = new Map();
+      const conflicts = [];
+      
+      pairs.forEach((p, index) => {
+        const find = p.find || '';
+        if (find.trim() === '') return;
+        
+        if (!findMap.has(find)) {
+          findMap.set(find, [{ ...p, index }]);
+        } else {
+          const existing = findMap.get(find);
+          // Check if any existing entry has a DIFFERENT replace value
+          const hasDifferentReplace = existing.some(e => e.replace !== p.replace);
+          if (hasDifferentReplace) {
+            conflicts.push({
+              find: find,
+              replaces: [...existing.map(e => e.replace), p.replace]
+            });
+          }
+          existing.push({ ...p, index });
+        }
+      });
+      
+      return conflicts;
+    }
+
+    // ---- deduplicate pairs (keep first occurrence) ----
+    function deduplicatePairs(pairs) {
+      const seen = new Set();
+      const unique = [];
+      const excluded = [];
+      for (const p of pairs) {
+        const key = `${p.find}|${p.replace}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(p);
+        } else {
+          excluded.push(p);
+        }
+      }
+      return { unique, excluded };
+    }
+
+    // ---- render with dedupe + conflict detection ----
+    function renderPairsFromArray(pairsArray) {
+      const container = document.getElementById('findReplaceContainer');
+      container.innerHTML = '';
+      
+      // First, deduplicate
+      const { unique, excluded } = deduplicatePairs(pairsArray);
+      
+      // Then check for conflicts in the unique list
+      const conflicts = findConflicts(unique);
+      
+      // Show notifications
+      const dedupeNotify = document.getElementById('dedupeNotify');
+      const conflictNotify = document.getElementById('conflictNotify');
+      
+      // Dedupe notification
+      if (excluded.length > 0) {
+        const names = excluded.map(p => `"${p.find}" → "${p.replace}"`).join(', ');
+        dedupeNotify.textContent = `⚠️ Excluded ${excluded.length} duplicate(s): ${names}`;
+        dedupeNotify.style.display = 'inline-block';
+        dedupeNotify.style.background = '#3a2a3a';
+        dedupeNotify.style.color = '#d4b3e6';
+        dedupeNotify.style.border = '1px solid #7a4a7a';
+      } else {
+        dedupeNotify.textContent = '';
+        dedupeNotify.style.display = 'none';
+      }
+      
+      // Conflict notification
+      if (conflicts.length > 0) {
+        const conflictMessages = conflicts.map(c => {
+          const replaces = c.replaces.map(r => `"${r}"`).join(' vs ');
+          return `"${c.find}" → ${replaces}`;
+        }).join('; ');
+        conflictNotify.textContent = `⚠️ CONFLICT: Same "find" with different "replace": ${conflictMessages}`;
+        conflictNotify.style.display = 'inline-block';
+        conflictNotify.style.background = '#3a2a2a';
+        conflictNotify.style.color = '#ffb3b3';
+        conflictNotify.style.border = '1px solid #aa4a4a';
+      } else {
+        conflictNotify.textContent = '';
+        conflictNotify.style.display = 'none';
+      }
+
+      // Render the unique list
+      if (unique.length === 0) {
+        container.appendChild(createWrapperWithButton('', ''));
+      } else {
+        unique.forEach(p => {
+          container.appendChild(createWrapperWithButton(p.find || '', p.replace || ''));
+        });
+      }
+      reinitSortable();
+    }
+
+    // ---- create pair element (without wrapper) ----
     function createPairElement(findValue = '', replaceValue = '') {
       const pairDiv = document.createElement('div');
       pairDiv.className = 'find-replace-pair';
-      
-      // Escape quotes for HTML attributes
       const escapedFind = findValue.replace(/"/g, '&quot;');
       const escapedReplace = replaceValue.replace(/"/g, '&quot;');
-      
       pairDiv.innerHTML = `
         <span class="drag-handle" title="Drag to reorder">☰</span>
         <label>Find:</label>
@@ -458,18 +461,14 @@
       return pairDiv;
     }
 
-    // Create a wrapper with hover insert button
+    // ---- wrapper with hover button ----
     function createWrapperWithButton(find = '', replace = '') {
       const wrapper = document.createElement('div');
       wrapper.className = 'pair-wrapper';
-      
-      // Create insert button (hidden by default via CSS)
       const insertBtn = document.createElement('span');
       insertBtn.className = 'insert-btn';
       insertBtn.textContent = '+';
       insertBtn.setAttribute('title', 'Insert new row above');
-      
-      // Add click handler to insert a new row above this wrapper
       insertBtn.onclick = function(e) {
         e.stopPropagation();
         const currentWrapper = this.closest('.pair-wrapper');
@@ -477,131 +476,161 @@
         const newWrapper = createWrapperWithButton('', '');
         container.insertBefore(newWrapper, currentWrapper);
         reinitSortable();
+        // Re-check conflicts after adding
+        checkCurrentConflicts();
       };
-      
-      // Create the pair element
       const pair = createPairElement(find, replace);
-      
-      // Assemble wrapper: button first, then pair
       wrapper.appendChild(insertBtn);
       wrapper.appendChild(pair);
+      
+      // Add input listeners to check conflicts on change
+      const findInput = pair.querySelector('.find');
+      const replaceInput = pair.querySelector('.replace');
+      findInput.addEventListener('input', checkCurrentConflicts);
+      replaceInput.addEventListener('input', checkCurrentConflicts);
       
       return wrapper;
     }
 
-    // Initialize or reset the container
-    function renderPairsFromArray(pairsArray) {
-      const container = document.getElementById('findReplaceContainer');
-      container.innerHTML = '';
+    // ---- check conflicts on current DOM state ----
+    function checkCurrentConflicts() {
+      const pairs = getCurrentPairs();
+      const { unique, excluded } = deduplicatePairs(pairs);
+      const conflicts = findConflicts(unique);
       
-      if (pairsArray.length === 0) {
-        // Always show at least one empty pair
-        container.appendChild(createWrapperWithButton('', ''));
+      const conflictNotify = document.getElementById('conflictNotify');
+      if (conflicts.length > 0) {
+        const conflictMessages = conflicts.map(c => {
+          const replaces = c.replaces.map(r => `"${r}"`).join(' vs ');
+          return `"${c.find}" → ${replaces}`;
+        }).join('; ');
+        conflictNotify.textContent = `⚠️ CONFLICT: Same "find" with different "replace": ${conflictMessages}`;
+        conflictNotify.style.display = 'inline-block';
+        conflictNotify.style.background = '#3a2a2a';
+        conflictNotify.style.color = '#ffb3b3';
+        conflictNotify.style.border = '1px solid #aa4a4a';
       } else {
-        pairsArray.forEach(p => {
-          container.appendChild(createWrapperWithButton(p.find || '', p.replace || ''));
-        });
+        conflictNotify.textContent = '';
+        conflictNotify.style.display = 'none';
       }
       
-      reinitSortable();
+      // Also update dedupe notification
+      const dedupeNotify = document.getElementById('dedupeNotify');
+      if (excluded.length > 0) {
+        const names = excluded.map(p => `"${p.find}" → "${p.replace}"`).join(', ');
+        dedupeNotify.textContent = `⚠️ Excluded ${excluded.length} duplicate(s): ${names}`;
+        dedupeNotify.style.display = 'inline-block';
+        dedupeNotify.style.background = '#3a2a3a';
+        dedupeNotify.style.color = '#d4b3e6';
+        dedupeNotify.style.border = '1px solid #7a4a7a';
+      } else {
+        dedupeNotify.textContent = '';
+        dedupeNotify.style.display = 'none';
+      }
     }
 
-    // Get current pairs as array of objects
+    // ---- get current pairs from DOM ----
     function getCurrentPairs() {
       const wrappers = document.querySelectorAll('#findReplaceContainer .pair-wrapper');
       const pairs = [];
-      
       wrappers.forEach(wrapper => {
         const findInput = wrapper.querySelector('.find');
         const replaceInput = wrapper.querySelector('.replace');
         if (findInput && replaceInput) {
-          pairs.push({
-            find: findInput.value,
-            replace: replaceInput.value
-          });
+          const find = findInput.value;
+          const replace = replaceInput.value;
+          // Only include non-empty finds
+          if (find && find.trim() !== '') {
+            pairs.push({ find, replace });
+          }
         }
       });
-      
       return pairs;
     }
 
-    // Add new pair at the bottom
+    // ---- add new pair at bottom ----
     function addFindReplacePair(find = '', replace = '') {
       const container = document.getElementById('findReplaceContainer');
       const newWrapper = createWrapperWithButton(find, replace);
       container.appendChild(newWrapper);
       reinitSortable();
+      checkCurrentConflicts();
     }
 
-    // Remove a pair (called from remove button)
+    // ---- remove pair ----
     function removePair(removeSpan) {
       const wrapper = removeSpan.closest('.pair-wrapper');
       const container = document.getElementById('findReplaceContainer');
-      
       if (container.children.length <= 1) {
         alert("At least one pair must remain.");
         return;
       }
-      
       wrapper.remove();
       reinitSortable();
+      checkCurrentConflicts();
     }
 
-    // Clear all pairs and add one empty
+    // ---- clear all pairs ----
     function clearFindReplaceInputs() {
       const container = document.getElementById('findReplaceContainer');
       container.innerHTML = '';
       container.appendChild(createWrapperWithButton('', ''));
       reinitSortable();
+      document.getElementById('dedupeNotify').textContent = '';
+      document.getElementById('dedupeNotify').style.display = 'none';
+      document.getElementById('conflictNotify').textContent = '';
+      document.getElementById('conflictNotify').style.display = 'none';
     }
 
-    // Sortable instance for drag-drop
+    // ---- Sortable ----
     let sortableInstance = null;
-
     function reinitSortable() {
-      if (sortableInstance) {
-        sortableInstance.destroy();
-      }
-      
+      if (sortableInstance) sortableInstance.destroy();
       const container = document.getElementById('findReplaceContainer');
       sortableInstance = new Sortable(container, {
         animation: 150,
         handle: '.drag-handle',
         ghostClass: 'dragging',
         dragClass: 'dragging',
-        onEnd: function() {
-          // Optional: any reorder logic
-        }
+        onEnd: checkCurrentConflicts
       });
     }
 
-    // Initialize on page load
-    window.onload = () => {
-      // Start with one empty pair - buttons will be hidden by default
-      renderPairsFromArray([{ find: '', replace: '' }]);
-      toggleCopyButtonVisibility();
-    };
-
-    // Export current list to JSON
+    // ---- export ----
     function exportList() {
       const pairs = getCurrentPairs();
-      const blob = new Blob([JSON.stringify(pairs, null, 2)], { type: 'application/json' });
+      const { unique, excluded } = deduplicatePairs(pairs);
+      const conflicts = findConflicts(unique);
+      
+      let warning = '';
+      if (excluded.length > 0) {
+        warning += `⚠️ ${excluded.length} duplicate(s) removed.\n`;
+      }
+      if (conflicts.length > 0) {
+        warning += `⚠️ CONFLICT: Same "find" with different "replace" values found.\n`;
+        conflicts.forEach(c => {
+          warning += `  "${c.find}" → ${c.replaces.map(r => `"${r}"`).join(' vs ')}\n`;
+        });
+      }
+      if (warning) {
+        alert(warning);
+      }
+      
+      const blob = new Blob([JSON.stringify(unique, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'find_replace_list.json';
       a.click();
     }
 
-    // Trigger import file picker
+    // ---- import ----
     function importList() {
       document.getElementById('importFile').click();
     }
 
-    // Handle imported JSON file
     function handleImport(event) {
       const file = event.target.files[0];
       if (!file) return;
-      
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
@@ -613,20 +642,19 @@
         }
       };
       reader.readAsText(file);
+      event.target.value = '';
     }
 
-    // Replace text function (unchanged)
+    // ---- replace text ----
     function replaceText() {
       let text = document.getElementById("inputText").value;
-
-      // Normalize line breaks
       text = text.replace(/[\u2028\u2029\u0085\u000B\u000C]/g, '\n').replace(/\r\n|\r/g, '\n');
 
-      const pairs = getCurrentPairs();
+      let pairs = getCurrentPairs();
+      
       const matchCase = document.getElementById("matchCase").checked;
       const wholeWords = document.getElementById("wholeWords").checked;
       const flags = matchCase ? 'g' : 'gi';
-
       const counts = [];
 
       pairs.forEach(({ find, replace }) => {
@@ -645,13 +673,11 @@
         }
       });
 
-      const resultText = document.getElementById("resultText");
-      resultText.value = text;
+      document.getElementById("resultText").value = text;
       toggleCopyButtonVisibility();
 
       const replacementDetails = document.getElementById("replacementDetails");
       const toggleBtn = document.getElementById("toggleReplacementsBtn");
-
       if (counts.length > 0) {
         replacementDetails.innerHTML = '• ' + counts.join('<br>• ');
         toggleBtn.style.display = 'inline-block';
@@ -663,10 +689,10 @@
       }
     }
 
+    // ---- toggle replacements ----
     function toggleReplacements() {
       const details = document.getElementById("replacementDetails");
       const toggleBtn = document.getElementById("toggleReplacementsBtn");
-
       if (details.style.display === "none") {
         details.style.display = "block";
         toggleBtn.textContent = "▲ Replacements";
@@ -676,6 +702,7 @@
       }
     }
 
+    // ---- copy, clear, scroll ----
     function toggleCopyButtonVisibility() {
       const resultText = document.getElementById("resultText");
       const copyButton = document.getElementById("copyButton");
@@ -685,7 +712,6 @@
     function copyResultText() {
       const resultText = document.getElementById("resultText");
       const copyButton = document.getElementById("copyButton");
-
       navigator.clipboard.writeText(resultText.value)
         .then(() => {
           copyButton.textContent = "Copied!";
@@ -695,9 +721,7 @@
             copyButton.disabled = false;
           }, 2000);
         })
-        .catch(() => {
-          alert("Failed to copy. Please copy manually.");
-        });
+        .catch(() => alert("Failed to copy. Please copy manually."));
     }
 
     function clearInputText() {
@@ -706,7 +730,6 @@
     }
 
     let atBottom = false;
-
     function toggleScroll() {
       if (atBottom) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -720,7 +743,6 @@
     function toggleFindReplaceSection() {
       const section = document.getElementById("findReplaceSection");
       const btn = document.getElementById("toggleFindReplaceBtn");
-
       if (section.style.display === "none") {
         section.style.display = "block";
         btn.textContent = "▼ Find and Replace List";
@@ -729,6 +751,46 @@
         btn.textContent = "▲ Find and Replace List";
       }
     }
-  </script>
+
+    // ---- paste ----
+    document.getElementById("pasteBtn").addEventListener("click", async function() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById("inputText").value = text;
+        toggleCopyButtonVisibility();
+      } catch (err) {
+        alert("Failed to paste. Please ensure clipboard permissions are granted.");
+      }
+    });
+
+    // ---- enter key ----
+    document.getElementById("inputText").addEventListener("keydown", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        replaceText();
+      }
+    });
+
+    // ---- init ----
+    window.onload = function() {
+      renderPairsFromArray([{ find: '', replace: '' }]);
+      toggleCopyButtonVisibility();
+      // expose functions globally for inline onclick
+      window.addFindReplacePair = addFindReplacePair;
+      window.removePair = removePair;
+      window.clearFindReplaceInputs = clearFindReplaceInputs;
+      window.exportList = exportList;
+      window.importList = importList;
+      window.handleImport = handleImport;
+      window.replaceText = replaceText;
+      window.toggleReplacements = toggleReplacements;
+      window.copyResultText = copyResultText;
+      window.clearInputText = clearInputText;
+      window.toggleScroll = toggleScroll;
+      window.toggleFindReplaceSection = toggleFindReplaceSection;
+      window.checkCurrentConflicts = checkCurrentConflicts;
+    };
+  })();
+</script>
 </body>
 </html>
